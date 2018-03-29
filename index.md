@@ -1,4 +1,4 @@
-## Welcome to GitHub Pages
+## 主页
 
 You can use the [editor on GitHub](https://github.com/zxc17/zxc17.github.io/edit/master/index.md) to maintain and preview the content for your website in Markdown files.
 
