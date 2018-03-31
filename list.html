@@ -1,0 +1,12 @@
+---
+layout: post
+title: 文章列表
+---
+
+<div id="home">
+  <ul class="posts">
+    {% for post in site.posts %}
+      <li><span>{{ post.date | date: "%Y/%m/%d" }}</span> &raquo; <a href="{{ site.baseurl }}{{ post.url | uri_escape }}">{{ post.title }}</a></li>
+    {% endfor %}
+  </ul>
+</div>

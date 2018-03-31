@@ -1,0 +1,20 @@
+# Setup
+title:        云梦斋
+name:         云梦斋
+tagline:      知识从一点一滴积累
+baseurl:      ""
+paginate:     1
+locale:       "zh"
+
+permalink: /:categories/:year/:month/:day/:title.html
+# About/contact
+author:
+  name:       云梦斋主人
+  url:        https://www.cdroom.net
+
+# Gems
+gems:
+  - jekyll-paginate
+
+#Others
+markdown: kramdown
