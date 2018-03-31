@@ -5,6 +5,7 @@ tagline:      知识从一点一滴积累
 baseurl:      ""
 paginate:     1
 locale:       "zh"
+siteurl: https://www.cdroom.net
 
 permalink: /:categories/:year/:month/:day/:title.html
 # About/contact
