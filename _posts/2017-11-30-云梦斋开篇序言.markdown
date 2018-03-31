@@ -2,25 +2,16 @@
 layout: post
 title:  "云梦斋开篇自序"
 date:   2017-11-30 17:50:00
-categories: main
+categories: site
 ---
 杜甫在《奉赠韦左丞丈二十二韵》中说“读书破万卷，下笔如有神”，说明了阅读作为一种信息输入方式的重要性。但是，仅仅通过阅读并不能真正提高自己的写作能力，作为一个从小到大不喜欢写作文的人，每次想记录一些感悟或经验时总是不知如何下笔，深深体会到了自己写作能力的缺乏。因此，便建立了此博客，取名为云梦斋，“云梦”二字取自“云梦秦简”，意在像“云梦秦简”的主人一样记录自己的所见所闻、所学所思，并自号“云简斋主人”。
 
 博客文章或记录生活，或抒发感想，或总结技术，或是其他，不拘于类别，重在点滴积累。
 
+同时，也欢迎关注我的微博，名字“云梦斋主人”，也可直接通过微博扫描下面的二维码查看我的微博主页。
+
+![云梦斋主人的微博](/image/weibo.png)
+
 2018-03-30
 
 云梦斋主人
-
-{% highlight ruby %}
-def print_hi(name)
-  puts "Hi, #{name}"
-end
-print_hi('Tom')
-#=> prints 'Hi, Tom' to STDOUT.
-{% endhighlight %}
-
-Check out the [Jekyll docs][jekyll] for more info on how to get the most out of Jekyll. File all bugs/feature requests at [Jekyll's GitHub repo][jekyll-gh].
-
-[jekyll-gh]: https://github.com/mojombo/jekyll
-[jekyll]:    http://jekyllrb.com

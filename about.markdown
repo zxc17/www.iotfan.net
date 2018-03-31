@@ -9,4 +9,6 @@ categories: site
 
 E-mail：[master@cdroom.com](mailto:master@cdroom.net)
 
-Weibo : 云梦斋主人
+Weibo : 云梦斋主人(可直接扫描下面二维码)
+
+![云梦斋主人的微博](/image/weibo.png)
