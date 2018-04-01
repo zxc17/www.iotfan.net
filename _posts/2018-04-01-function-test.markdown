@@ -5,7 +5,7 @@ date:   2018-04-01 21:17:00
 categories: site
 tag: 测试
 ---
-{% highlight %}
+``` c
 #include <windows.h>
 #include <stdio.h>
 #include <direct.h>
