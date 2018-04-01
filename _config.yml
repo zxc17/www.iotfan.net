@@ -3,7 +3,7 @@ title:        云梦斋
 name:         云梦斋
 tagline:      知识从一点一滴积累
 baseurl:      ""
-paginate:     1
+#paginate:     1
 locale:       "zh"
 siteurl: https://www.cdroom.net
 
@@ -14,8 +14,8 @@ author:
   url:        https://www.cdroom.net
 
 # Gems
-gems:
-  - jekyll-paginate
+#gems:
+#  - jekyll-paginate
 
 #Others
 markdown: kramdown
