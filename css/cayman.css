@@ -150,6 +150,11 @@ a:hover { text-decoration: underline; }
 @media screen and (max-width: 42em) { img.project-name-logo { width: 1.2rem;  height: 1.8rem; } }
 
 .project-name { margin-top: 0; margin-bottom: 0.1rem; }
+@media screen and (min-width: 64em) { .project-name { margin-left:2rem; font-size: 3.25rem; } }
+@media screen and (min-width: 42em) and (max-width: 64em) { .project-name { margin-left:1.6rem; font-size: 2.25rem; } }
+@media screen and (max-width: 42em) { .project-name { margin-left:1.2rem; font-size: 1.75rem; } }
+
+.post-name { margin-top: 0; margin-bottom: 0.1rem; }
 @media screen and (min-width: 64em) { .project-name { font-size: 3.25rem; } }
 @media screen and (min-width: 42em) and (max-width: 64em) { .project-name { font-size: 2.25rem; } }
 @media screen and (max-width: 42em) { .project-name { font-size: 1.75rem; } }
