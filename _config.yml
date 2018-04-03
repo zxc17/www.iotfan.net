@@ -1,13 +1,13 @@
 # Setup
 title:        云梦斋
 name:         云梦斋
-tagline:      知识从一点一滴积累
+tagline:      总结知识，分享感悟，欢迎关注云梦斋
 baseurl:      ""
 #paginate:     1
 locale:       "zh"
 siteurl: https://www.cdroom.net
-
-permalink: /:categories/:year/:month/:day/:title.html
+# timezone: '+0800'
+permalink: /:year/:month/:day/:title.html
 # About/contact
 author:
   name:       云梦斋主人

@@ -155,9 +155,54 @@ a:hover { text-decoration: underline; }
 @media screen and (max-width: 42em) { .project-name { margin-left:1.2rem; font-size: 1.75rem; } }
 
 .post-name { margin-top: 0; margin-bottom: 0.1rem; }
-@media screen and (min-width: 64em) { .project-name { font-size: 3.25rem; } }
-@media screen and (min-width: 42em) and (max-width: 64em) { .project-name { font-size: 2.25rem; } }
-@media screen and (max-width: 42em) { .project-name { font-size: 1.75rem; } }
+@media screen and (min-width: 64em) { .post-name { font-size: 3.25rem; } }
+@media screen and (min-width: 42em) and (max-width: 64em) { .post-name { font-size: 2.25rem; } }
+@media screen and (max-width: 42em) { .post-name { font-size: 1.75rem; } }
+
+.post-headline {
+  color: #808080;
+  font-weight: normal;
+  font-size: 0.96rem;
+}
+/*
+@media screen and (min-width: 64em) { .post-tags { font-size: 1.0rem; } }
+@media screen and (min-width: 42em) and (max-width: 64em) { .post-tags { font-size: 0.9rem; } }
+@media screen and (max-width: 42em) { .post-tags { font-size: 0.9rem; } }
+*/
+.post-headline-tag {
+  display: inline-block;
+  padding: 0 0.4rem;
+  margin: 0 0.3rem 0 0rem;
+  color: #017E66;
+  background-color: rgba(1,126,102,0.08);  
+  text-align: center;
+}
+.post-headline-author {
+  display: inline-block;
+  margin: 0 0.2rem;
+  color: #009a61;
+  font-weight: bold;
+  text-align: center;
+}
+.post-headline-date {
+  display: inline-block;
+  margin: 0 0.1rem;
+  text-align: center;
+}
+/*
+@media screen and (min-width: 64em) { .post-tags { font-size: 1.0rem; } }
+@media screen and (min-width: 42em) and (max-width: 64em) { .post-tags { font-size: 0.9rem; } }
+@media screen and (max-width: 42em) { .post-tags { font-size: 0.9rem; } }*/
+
+.post-endline {text-align: right; line-height: 1.0}
+@media screen and (min-width: 64em) { .post-endline { font-size: 1.1rem; } }
+@media screen and (min-width: 42em) and (max-width: 64em) { .post-endline { font-size: 1.1rem; } }
+@media screen and (max-width: 42em) { .post-endline { font-size: 1.1rem; } }
+
+.post-navigation { line-height: 0.8}
+@media screen and (min-width: 64em) { .post-navigation { font-size: 1.1rem; } }
+@media screen and (min-width: 42em) and (max-width: 64em) { .post-navigation { font-size: 1.1rem; } }
+@media screen and (max-width: 42em) { .post-navigation { font-size: 1.1rem; } }
 
 .project-tagline { margin-bottom: 2rem; font-weight: normal; opacity: 0.7; }
 @media screen and (min-width: 64em) { .project-tagline { font-size: 1.25rem; } }

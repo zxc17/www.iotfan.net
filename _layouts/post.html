@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ site.locale }}">
-  
+<html lang="{{ site.locale }}">  
   <head>
     <meta charset="UTF-8">
     <title>{{ page.title }}_{{ site.title }}</title>
@@ -29,14 +28,27 @@
 
   <body>
     {% include post-header.html %}
-
     <section class="main-content">
-      
+      {% if page.showheadline %}
+      <blockquote class="post-headline"><em>版权声明：本站所有文章如未特别说明均为原创，未经本人许可禁止转载<br>
+      本文链接：<a href="{{ site.siteurl }}{{ page.url | uri_escape }}">{{ site.siteurl }}{{ page.url | uri_escape }}</a></em></blockquote>
+      <p class="post-headline">
+        {% for tag in page.tags %}<a class="post-headline-tag" href="/tags.html#{{ tag }}">{{ tag }}</a>{% endfor %}
+        <a class="post-headline-author" href="/about.html">{{ site.author.name }}</a>
+        <span class="post-headline-date">{{ page.date | date: "%Y年%m月%d日发布" }}</span>
+        <span class="post-headline-date">所属分类：<a href="/categories.html#{{ page.categories }}">{{ page.categories }}</a></span>
+      </p>
+      {% endif %}      
       {{ content }}
-
-      {% include page-footer.html %}
-
+      <br><p class="post-endline">编辑于{{ page.date | date: "%Y-%m-%d" }}</p>
+      <p class="post-endline">{{ site.author.name }}</p><br>
+      {% if page.previous != null %}
+        <p class="post-navigation" >上一篇：<a href="{{ page.previous.url }}">{{ page.previous.title }}</a></p>
+      {% endif %}
+      {% if page.next != null %}
+        <p class="post-navigation">下一篇：<a href="{{ page.next.url }}">{{ page.next.title }}</a></p>
+      {% endif %}      
+      {% include page-footer.html %}      
     </section>
-
   </body>
 </html>
