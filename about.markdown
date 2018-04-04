@@ -1,8 +1,7 @@
 ---
-layout: post
+layout: page
 title:  "关于本站"
-date:   2017-11-30 17:50:00
-categories: site
+date:   2018-02-13
 ---
 记录生活，分享感悟，总结知识，欢迎关注云梦斋！
 
@@ -12,4 +11,4 @@ E-mail：[master@cdroom.com](mailto:master@cdroom.net)
 
 Weibo : 云梦斋主人 (可直接扫描下面二维码)
 
-![云梦斋主人的微博](/assets/weibo.png)
+<img src="/assets/weibo.png" alt="云梦斋主人的微博" style="margin: 0px; border: 0; "/>
