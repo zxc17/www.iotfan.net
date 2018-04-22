@@ -4,7 +4,15 @@
     <meta charset="UTF-8">
     <title>{{ page.title }}_{{ site.title }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#157878">
+    <meta name="theme-color" content="#157878">    
+    {% capture desps %}
+      {% if page.content contains "<!--excerpt.start-->" and page.content contains "<!--excerpt.end-->" %}
+        {{ page.content | split: "<!--excerpt.start-->" | last | split: "<!--excerpt.end-->" | first | strip_html | truncate: 140 }}
+      {% else %}
+        {{ page.content | strip_html | truncate: 140 }}
+      {% endif %}
+    {% endcapture %}
+    <meta name="description" content="{{ desps | strip_newlines | strip }}" />
     <link rel="stylesheet" href="{{ site.baseurl }}/css/normalize.css">
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="{{ site.baseurl }}/css/cayman.css">
@@ -36,7 +44,8 @@
         {% for tag in page.tags %}<a class="post-headline-tag" href="/tags.html#{{ tag }}">{{ tag }}</a>{% endfor %}
         <a class="post-headline-author" href="/about.html">{{ site.author.name }}</a>
         <span class="post-headline-date">{{ page.date | date: "%Y年%m月%d日发布" }}</span>
-        <span class="post-headline-date">所属分类：<a href="/categories.html#{{ page.categories }}">{{ page.categories }}</a></span>
+        <span class="post-headline-date">所属分类：<a href="/categories.html#{{ page.categories }}">{{ page.categories }}</a>&nbsp;&nbsp;</span>
+        <span class="post-headline-date"><a href="/">返回主页</a></span>
       </p>
       {% endif %}      
       {{ content }}
