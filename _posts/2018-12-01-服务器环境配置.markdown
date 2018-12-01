@@ -1,0 +1,122 @@
+---
+layout: post
+title:  "服务器环境配置"
+subtitle: 
+showheadline: true
+categories: IT
+tags: [Markdown, 整理]
+---
+
+本文主要是新建服务器的常用环境配置，针对的是Centos系统，其他版本的Linux也可以参考。
+
+## 登录设置
+
+有的云服务器新建后只有一个root用户，而Linux系统不建议直接在root中执行操作，因此有必要为系统添加一个普通用户，并禁止root的远程登录权限。
+
+*	添加用户：`adduser 用户名`
+*	修改密码：`passwd 用户名`，也可以不指定用户名，这时修改的是当前用户的密码。
+*	给新用户授予sudo权限：
+	-	给sudoers添加写权限：`chmod +w /etc/sudoers`
+	-	打开`/etc/sudoers`文件，并找到和下面几行类似的地方：
+		```bash
+		## Allow root to run any commands anywhere 
+		root    ALL=(ALL)       ALL
+		```
+		修改文件，把root开头那行复制一下添加到该行的下面，并把其中的root改成自己的用户名，然后保存。
+	-	取消sudoers的写权限：`chmod -w /etc/sudoers`
+*	设置ssh密钥登录：
+
+	基本原理是生成一对ssh密钥对，将其中的公钥添加到用户目录的`.ssh/authorized_keys`文件（可以使用`cat 公钥文件 >> ~/.ssh/authorized_keys`命令将公钥追加到认证文件中），然后登录时使用私钥进行认证。生成ssh密钥的方法是：
+	```bash
+	ssh-keygen -t rsa -C your_email@example.com
+	```
+	密钥的默认保存位置是`~/.ssh`，名字是`id_rsa`和`id_rsa.pub`。
+
+	修改sshd配置文件
+	`vim /etc/ssh/sshd_config`（如果没有此文件可能是没有安装sshd服务，可使用`yum install openssh-server -y`命令进行安装，默认服务器版Linux都会预安装sshd）。其中重要的是下面几行：
+	```bash
+	Port=22  #设置SSH的端口号是22(默认端口号为22)
+	Protocol 2  #启用SSH版本2协议
+	ListenAddress 192.168.0.10  #设置服务监听的地址
+	DenyUsers   user1  foo  #拒绝访问的用户(用空格隔开)
+	AllowUsers  root user2  #允许访问的用户(用空格隔开)
+	PermitRootLogin  no  #禁止root用户登陆
+	PermitEmptyPasswords no  #用户登陆需要密码认证
+	PasswordAuthentication  no  #禁用口令认证方式
+	```
+	根据自己的需要进行修改，然后保存。
+
+	修改sshd_config后需要重启sshd服务：`systemctl restart sshd.service`。
+
+## Nginx
+
+*	安装： `yum install nginx`
+*	配置： `/etc/nginx/nginx.conf`
+	*	主要包括： SSL, root_dir, host, php, log.
+*	运行管理（Centos 7 and later）：
+	*	启动： `systemctl start nginx.service`
+	*	停止： `systemctl stop nginx.service`
+	*	重启： `systemctl restart nginx.service`
+	*	服务运行状态： `systemctl status nginx.service`
+	*	开机自启动： `systemctl enable nginx.service`
+	*	取消开机自启动： `systemctl disable nginx.service`
+	关于systemctl的用法及其与service和chkconfig的关系，可以参考：[RHEL 7 中 systemctl 的用法（替代service 和 chkconfig）][systemctl]
+
+  [systemctl]: https://blog.csdn.net/catoop/article/details/47318225
+
+安装并启动后，可以使用`curl 127.0.0.1`或者`wget 127.0.0.1`测试Nginx是否正常运行。
+
+## Jekyll
+Jekyll是一个静态博客渲染器，支持用Markdown编写我们的静态网页，结合Github Pages我们可以轻松在Github上建立自己的静态博客站点，而无需自己搭建Web环境。Jekyll的安装及使用可以参考[Jekyll官方文档][Jekyll],这里介绍一下Jekyll在Linux上的安装步骤：
+
+1.	安装依赖（应该避免直接使用root用户安装）：
+	-	如果是Ubuntu，使用：`sudo apt-get install ruby-full build-essential`。
+	-	如果是Centos，直接使用`sudo yum install ruby ruby-devel`安装的ruby版本太旧，导致Jekyll无法安装。因此需要先添加yum源（当然也可以编译安装）：
+		```bash
+		yum install centos-release-scl-rh
+		```
+		然后执行`yum install rh-ruby24 rh-ruby24-ruby-devel -y`命令，安装ruby和ruby-devel。注意其中的24是ruby的版本，根据自己的需要选择，可以使用命令`yum list rh-ruby*`查看所有可用的rh-ruby版本。
+		
+		安装完成后，执行`source scl_source enable rh-ruby24`，然后执行`ruby -v`查看是否安装成功。`source scl_source enable rh-ruby24`只在当前会话中生效，如果不想每次登录后执行ruby前都执行此命令，可以使用下面命令在`~/.bashrc`中添加配置：
+		```bash
+		echo '# enable rh-ruby' >>  ~/.bashrc
+		echo 'source scl_source enable rh-ruby24' >>  ~/.bashrc
+		source ~/.bashrc #立即生效
+		```
+
+2.	添加环境变量：
+	```bash
+	echo '# Install Ruby Gems to ~/gems' >> ~/.bashrc
+	echo 'export GEM_HOME=$HOME/gems' >> ~/.bashrc
+	echo 'export PATH=$HOME/gems/bin:$PATH' >> ~/.bashrc
+	source ~/.bashrc
+	```
+
+3.	安装Jekyll，使用：
+	```bash
+	gem install jekyll bundler
+	```
+	这里还有问题，如果在服务器在国内，gem源可能访问不了或者访问速度极慢，导致gem命令无反应。因此需要先删除gem自带的源并添加国内的源：
+	```bash
+	gem sources --add https://gems.ruby-china.com/ --remove https://rubygems.org/
+	gem sources -l	# 查看当前的源，看看是否添加成功
+	```
+	如果安装过程中提示gcc和g++未发现，那么使用下面命令安装gcc和g++,然后重新执行安装：
+	```bash
+	yum install gcc gcc-c++
+	```	
+4.	新建站点并运行：
+	-	新建
+		```bash
+		jekyll new myblog
+		```
+	-	运行
+		```bash
+		bundle exec jekyll serve
+		```
+  [Jekyll]: https://jekyllrb.com/docs/installation/
+
+## PHP-FPM
+
+<!--\{\{ page.date - 28800 | date: "%Y-%m-%d %H:%M" }}-->
+
