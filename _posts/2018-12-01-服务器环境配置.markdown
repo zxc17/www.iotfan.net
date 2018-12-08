@@ -118,5 +118,153 @@ Jekyll是一个静态博客渲染器，支持用Markdown编写我们的静态网
 
 ## PHP-FPM
 
+
+## MariaDB
+MariaDB源于MySQL，除了一些地方的名字与MySQL不同，使用方法与MySQL几乎完全一致。此处安装时的版本是`mariadb-5.5`，对于其他版本未做测试，一般来说是一致的。
+
+1. 安装与卸载
+	- 安装
+		```bash
+		yum install mariadb mariadb-server
+		```
+	- 启动
+		```bash
+		systemctl start mariadb.service
+		systemctl enable mariadb.service
+		```
+		启动后使用`mysql -uroot`登录mysql，看一下安装是否成功。
+2. 配置
+	- `/etc/my.cnf`
+		主配置文件。第2-3行指定了数据文件的存储位置，可以修改为自己的目录。其他地方不需更改。
+		```conf
+		[mysqld]
+		datadir=/var/lib/mysql
+		socket=/var/lib/mysql/mysql.sock
+		# Disabling symbolic-links is recommended to prevent assorted security risks
+		symbolic-links=0
+		# Settings user and group are ignored when systemd is used.
+		# If you need to run mysqld under a different user or group,
+		# customize your systemd unit file for mariadb according to the
+		# instructions in http://fedoraproject.org/wiki/Systemd
+
+		[mysqld_safe]
+		log-error=/var/log/mariadb/mariadb.log
+		pid-file=/var/run/mariadb/mariadb.pid
+
+		#
+		# include all files from the config directory
+		#
+		!includedir /etc/my.cnf.d
+		```
+	- `/etc/my.cnf.d/client.cnf`
+		不需修改。可在client中指定提示符格式。
+		```conf
+		#
+		# These two groups are read by the client library
+		# Use it for options that affect all clients, but not the server
+		#
+
+
+		[client]
+		#prompt="\\u@\\h \\d>"
+		# This group is not read by mysql client library,
+		# If you use the same .cnf file for MySQL and MariaDB,
+		# use it for MariaDB-only client options
+		[client-mariadb]
+
+		```
+	- `/etc/my.cnf.d/mysql-clients.cnf`
+		在`[mysql]`选项下添加一行，用于指定默认字符编码。
+		```conf
+		#
+		# These groups are read by MariaDB command-line tools
+		# Use it for options that affect only one utility
+		#
+
+		[mysql]
+		default-character-set=utf8
+		[mysql_upgrade]
+
+		[mysqladmin]
+
+		[mysqlbinlog]
+
+		[mysqlcheck]
+
+		[mysqldump]
+
+		[mysqlimport]
+
+		[mysqlshow]
+
+		[mysqlslap]
+
+		```
+
+	- `/etc/my.cnf.d/server.cnf`
+		默认没有任何选项被设置，可根据下面的样例修改，不再赘述。
+		```conf
+		#
+		# These groups are read by MariaDB server.
+		# Use it for options that only the server (but not clients) should see
+		#
+		# See the examples of server my.cnf files in /usr/share/mysql/
+		#
+
+		# this is read by the standalone daemon and embedded servers
+		[server]
+
+		# this is only for the mysqld standalone daemon
+		[mysqld]
+		init_connect='SET collation_connection = utf8_general_ci'
+		init_connect='SET NAMES utf8'
+		character-set-server=utf8
+		collation-server=utf8_general_ci
+		skip-character-set-client-handshake
+
+		#open slow query log
+		slow_query_log = ON
+		slow_query_log_file = /var/log/mariadb/slow.log
+		long_query_time = 1
+		# this is only for embedded server
+		[embedded]
+
+		# This group is only read by MariaDB-5.5 servers.
+		# If you use the same .cnf file for MariaDB of different versions,
+		# use this group for options that older servers don't understand
+		[mysqld-5.5]
+
+		# These two groups are only read by MariaDB servers, not by MySQL.
+		# If you use the same .cnf file for MySQL and MariaDB,
+		# you can put MariaDB-only options here
+		[mariadb]
+
+		[mariadb-5.5]
+		```
+3. 更改默认文件夹的方法
+	默认MariaDB/MySQL的数据文件存放在`/var/lib/mysql`目录下，有时我们需要更改数据文件存放的位置（下面假设存放在`/data/db`），更改的步骤如下：
+	- 停止MariaDB服务：`systemctl stop mariadb.service`
+	- 将`/etc/my.cnf`中的`datadir`和`socket`的路径修改为`/data/db`（自己的目录）
+	- 在`/etc/my.cnf.d/client.cnf`中的`[client]`下添加`socket=/data/db/mysql.sock`
+	- 复制原来的数据文件到新的目录：
+		```bash
+		cp -a /var/lib/mysql/*  /data/db
+		```
+	- 启动MariaDB服务：`systemctl start mariadb.service`
+	- 如果未出现问题，将原文件夹的文件删除（可选）
+
+	如果出现错误，检查是否是权限问题导致的，`/data/db`以及其子目录的所有者应该是`mysql:mysql`，如果不是，可用下面的命令修改：
+	```bash
+	chown mysql:mysql /data/db -R
+	```
+
+	用此方法，也可将旧的数据库迁移到**空**的新数据库来。直接将旧数据库下的文件复制到新的空数据库目录中（同名文件直接覆盖）。
+
+4. 卸载
+	```bash
+	yum remove mariadb mariadb-server
+	rm -rf /var/lib/mysql
+	rm -rf /etc/my.cnf /etc/my.cnf.d #	配置文件根据自己需要决定是否删除，删除前最好备份，以免配置文件丢失。
+	```
 <!--\{\{ page.date - 28800 | date: "%Y-%m-%d %H:%M" }}-->
 
