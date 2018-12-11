@@ -117,7 +117,64 @@ Jekyll是一个静态博客渲染器，支持用Markdown编写我们的静态网
   [Jekyll]: https://jekyllrb.com/docs/installation/
 
 ## PHP-FPM
+yum list installed | grep php 
 
+yum安装php7.1
+安装php源:
+rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm 
+rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
+检查源是否安装成功；
+yum repolist enabled | grep "webtatic*"
+安装php扩展源：
+yum install -y php71w-cli php71w-common php71w-devel php71w-fpm php71w-gd php71w-mbstring php71w-mysql php71w-pdo
+
+yum -y install php71w php71w-fpm
+yum -y install php71w-mbstring php71w-common php71w-gd php71w-mcrypt
+yum -y install php71w-mysql php71w-xml php71w-cli php71w-devel
+/yum -y install php71w-pecl-memcached php71w-pecl-redis php71w-opcache
+验证php7.1.x和扩展是否安装成功 ：
+验证php是否安装成功
+php -v
+验证对应的扩展是否安装成功
+php -m
+设置php-fpm并检测php-fpm的运行状态：
+启动php-fpm
+service php-fpm star
+检查启动是否成功
+service php-fpm status
+设置开机自启动：
+systemctl enable php-fpm.service
+检查开机自启动是否设置成功:
+systemctl list-dependencies | grep php-fpm
+ps -ef | grep php-fpm
+
+listen = 127.0.0.1:9000
+## JDK
+
+1. 下载
+	到[jdk][Oracle]官网找到Java SE Development Kit版本下载链接，点击`Accept License Agreement`，然后选择`Linux x64`的后缀是`.tar.gz`的版本，然后鼠标右击下载链接，选择复制链接地址。此时，在Linux Shell中执行下面的命令下载JDK：
+	```bash
+	wget --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" 这里加上刚才复制的链接地址
+	```
+2. 配置
+	本文下载的JDK版本是`8u191`，因此文件名是`jdk-8u191-linux-x64.tar.gz`，接下来的步骤请替换为自己的版本。
+	- 解压JDK
+		```bash
+		tar -xzf jdk-8u191-linux-x64.tar.gz		#解压
+		sudo mv jdk1.8.0_191 /usr/local/jdk1.8.0_191	#移动到/usr/local目录
+		```
+	- 添加环境变量
+		使用`sudo vim /etc/profile`打开`/etc/profile`文件，在末尾添加：
+		```bash
+		#JDK environment
+		export JAVA_HOME=/usr/local/jdk1.8.0_191
+		export JRE_HOME=$JAVA_HOME/jre
+		export PATH=$PATH:$JAVA_HOME/bin
+		export CLASSPATH=./:$JAVA_HOME/lib:$JRE_HOME/lib
+		```
+		然后保存，退出。执行`source /etc/profile`使新添加的环境变量立即生效。使用`java -version`进行测试，如果安装成功会打印java的版本号。
+
+[jdk]: https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
 
 ## MariaDB
 MariaDB源于MySQL，除了一些地方的名字与MySQL不同，使用方法与MySQL几乎完全一致。此处安装时的版本是`mariadb-5.5`，对于其他版本未做测试，一般来说是一致的。
