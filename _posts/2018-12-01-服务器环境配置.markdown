@@ -4,10 +4,18 @@ title:  "服务器环境配置"
 subtitle: 
 showheadline: true
 categories: IT
-tags: [Markdown, 整理]
+tags: [Linux, 整理]
 ---
 
 本文主要是新建服务器的常用环境配置，针对的是Centos系统，其他版本的Linux也可以参考。
+
+## 常用工具
+	
+-	常用工具名字
+	```bash
+	vim htop tree
+	```
+
 
 ## 登录设置
 
@@ -50,6 +58,8 @@ tags: [Markdown, 整理]
 
 ## Nginx
 
+[Nginx开始向导][nginx]
+
 *	安装： `yum install nginx`
 *	配置： `/etc/nginx/nginx.conf`
 	*	主要包括： SSL, root_dir, host, php, log.
@@ -60,11 +70,14 @@ tags: [Markdown, 整理]
 	*	服务运行状态： `systemctl status nginx.service`
 	*	开机自启动： `systemctl enable nginx.service`
 	*	取消开机自启动： `systemctl disable nginx.service`
+	*	检查开机启动是否设置成功：`systemctl list-dependencies | grep php-fpm`
 	关于systemctl的用法及其与service和chkconfig的关系，可以参考：[RHEL 7 中 systemctl 的用法（替代service 和 chkconfig）][systemctl]
 
   [systemctl]: https://blog.csdn.net/catoop/article/details/47318225
 
 安装并启动后，可以使用`curl 127.0.0.1`或者`wget 127.0.0.1`测试Nginx是否正常运行。
+
+[nginx]: http://nginx.org/en/docs/beginners_guide.html
 
 ## Jekyll
 Jekyll是一个静态博客渲染器，支持用Markdown编写我们的静态网页，结合Github Pages我们可以轻松在Github上建立自己的静态博客站点，而无需自己搭建Web环境。Jekyll的安装及使用可以参考[Jekyll官方文档][Jekyll],这里介绍一下Jekyll在Linux上的安装步骤：
@@ -117,42 +130,43 @@ Jekyll是一个静态博客渲染器，支持用Markdown编写我们的静态网
   [Jekyll]: https://jekyllrb.com/docs/installation/
 
 ## PHP-FPM
-yum list installed | grep php 
+[PHP-FPM官网][php-fpm]
 
-yum安装php7.1
-安装php源:
-rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm 
-rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
-检查源是否安装成功；
-yum repolist enabled | grep "webtatic*"
-安装php扩展源：
-yum install -y php71w-cli php71w-common php71w-devel php71w-fpm php71w-gd php71w-mbstring php71w-mysql php71w-pdo
+1.	查看已安装的php程序
+	```bash
+	yum list installed | grep php 
+	```
+2.	安装PHP7所在的源
+	-	安装php源
+		```bash
+		rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm 
+		rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
+		```
+	-	检查源是否安装成功
+		```bash
+		yum repolist enabled | grep "webtatic*"
+		```
+	-	安装php-fpm 7.1及其基本扩展
+		```bash
+		yum install -y php71w-fpm php71w-common php71w-devel php71w-cli php71w-gd php71w-mbstring php71w-mysql php71w-pdo
+		```
+		>	其他常用的扩展：
+			php71w-mcrypt php71w-xml
+			php71w-pecl-memcached php71w-pecl-redis php71w-opcache
+	-	验证安装是否成功
+		-	验证php是否安装成功：`php -v`
+		-	验证对应的扩展是否安装成功：`php -m`
+		-	启动php-fpm服务：`systemctl start php-fpm.service`
+		-	设置开机启动：`systemctl enable php-fpm.service`
+3.	主要配置文件
+	`/etc/php.ini`
 
-yum -y install php71w php71w-fpm
-yum -y install php71w-mbstring php71w-common php71w-gd php71w-mcrypt
-yum -y install php71w-mysql php71w-xml php71w-cli php71w-devel
-/yum -y install php71w-pecl-memcached php71w-pecl-redis php71w-opcache
-验证php7.1.x和扩展是否安装成功 ：
-验证php是否安装成功
-php -v
-验证对应的扩展是否安装成功
-php -m
-设置php-fpm并检测php-fpm的运行状态：
-启动php-fpm
-service php-fpm star
-检查启动是否成功
-service php-fpm status
-设置开机自启动：
-systemctl enable php-fpm.service
-检查开机自启动是否设置成功:
-systemctl list-dependencies | grep php-fpm
-ps -ef | grep php-fpm
+[php-fpm]: http://www.php.net/manual/zh/install.fpm.php
 
-listen = 127.0.0.1:9000
 ## JDK
 
 1. 下载
-	到[jdk][Oracle]官网找到Java SE Development Kit版本下载链接，点击`Accept License Agreement`，然后选择`Linux x64`的后缀是`.tar.gz`的版本，然后鼠标右击下载链接，选择复制链接地址。此时，在Linux Shell中执行下面的命令下载JDK：
+	到[Oracle][jdk]官网找到Java SE Development Kit版本下载链接，点击`Accept License Agreement`，然后选择`Linux x64`的后缀是`.tar.gz`的版本，然后鼠标右击下载链接，选择复制链接地址。此时，在Linux Shell中执行下面的命令下载JDK：
 	```bash
 	wget --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" 这里加上刚才复制的链接地址
 	```
@@ -177,7 +191,7 @@ listen = 127.0.0.1:9000
 [jdk]: https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
 
 ## MariaDB
-MariaDB源于MySQL，除了一些地方的名字与MySQL不同，使用方法与MySQL几乎完全一致。此处安装时的版本是`mariadb-5.5`，对于其他版本未做测试，一般来说是一致的。
+[MariaDB][]源于MySQL，除了一些地方的名字与MySQL不同，使用方法与MySQL几乎完全一致。此处安装时的版本是`mariadb-5.5`，对于其他版本未做测试，一般来说是一致的。
 
 1. 安装与卸载
 	- 安装
@@ -317,11 +331,30 @@ MariaDB源于MySQL，除了一些地方的名字与MySQL不同，使用方法与
 
 	用此方法，也可将旧的数据库迁移到**空**的新数据库来。直接将旧数据库下的文件复制到新的空数据库目录中（同名文件直接覆盖）。
 
+	建议不要移动`mysql.sock`文件，因为该文件是MySQL Server的监听sock，并不存放我们的数据，而其他程序（例如MySQL Client和各种MySQL驱动）会默认使用`/var/lib/mysql/mysql.sock`这个sock文件去连接MySQL Server，如果更改该文件的位置的话，需要连接MySQL Server的程序或驱动的设置可能都需要更改。因此如无特殊需要，不要更改此文件的位置。
+	
+	更改PHP配置文件`/etc/php.ini`，把`pdo_mysql.default_socket`设置为移动后的文件路径：
+	```conf
+	[Pdo_mysql]
+	; If mysqlnd is used: Number of cache slots for the internal result set cache
+	; http://php.net/pdo_mysql.cache_size
+	pdo_mysql.cache_size = 2000
+
+	; Default socket name for local MySQL connects.  If empty, uses the built-in
+	; MySQL defaults.
+	; http://php.net/pdo_mysql.default-socket
+	pdo_mysql.default_socket=/data/db/mysql.sock
+
+	[Phar]
+	```
+
 4. 卸载
 	```bash
 	yum remove mariadb mariadb-server
 	rm -rf /var/lib/mysql
 	rm -rf /etc/my.cnf /etc/my.cnf.d #	配置文件根据自己需要决定是否删除，删除前最好备份，以免配置文件丢失。
 	```
+
+[MariaDB]: https://downloads.mariadb.org/
 <!--\{\{ page.date - 28800 | date: "%Y-%m-%d %H:%M" }}-->
 
