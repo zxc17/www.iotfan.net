@@ -1,0 +1,431 @@
+---
+layout: post
+title:  "Matlab绘图手册"
+subtitle: 
+showheadline: true
+categories: IT
+tags: [Matlab, 整理]
+---
+
+参考链接：
+-	图形对象属性：[http://ww2.mathworks.cn/help/matlab/graphics-object-properties.html](http://ww2.mathworks.cn/help/matlab/graphics-object-properties.html)
+-	图形：[https://ww2.mathworks.cn/help/matlab/graphics.html](https://ww2.mathworks.cn/help/matlab/graphics.html)
+
+* TOC
+{:toc}
+
+## 一、基本绘图操作
+
+### 1、点&线&颜色
+![aa-1.png](/assets/matlab/aa-1.png)
+
+示例：
+```matlab
+X=0:0.1:10;
+Y=sin(X);
+plot(X,Y,'--r+'); % dash line & red color & plus sign marker
+% 等价于下面的Name-Value对形式
+plot(X,Y, 'LineStyle','--',...
+        'Color','r',...
+        'Marker','+');
+```
+MarkerSpec：
+```
+Marker:	Marker类型
+MarkerSize: Marker大小(default:6)
+MarkerEdgeColor: Marker边缘轮廓颜色
+MarkerFaceColor: Marker内部颜色
+MarkerIndices: (default:X)
+```
+LineSpec：
+
+```
+LineWidth: 线宽(default:0.5)
+Color: 线的颜色
+LineStyle: 线型
+```
+
+### 2、标题、坐标轴、图例
+设置标题：
+```matlab
+title('y = \ite^{lambda t}', 'color', 'b')
+```
+>如上，Matlab绘图窗口中大多数文本(如标题，text函数，轴标签等)支持TeX语法
+
+
+设置坐标轴标签：
+```matlab
+xlabel('x')
+ylabel('y')
+zlabel('z')
+```
+设置坐标轴范围：
+```matlab
+axis([xmin xmax ymin ymax])
+axis([xmin xmax ymin ymax zmin zmax])
+axis([xmin xmax ymin ymax zmin zmax cmin cmax])
+% 单独设置x,y,z轴范围
+xlim([xmin xmax])  % ylim,zlim同理
+```
+设置坐标间隔：
+```matlab
+set(gca,'XTick',[2:2:46]) %改变x轴坐标间隔显示,这里间隔为2
+```
+设置图例：
+```matlab
+legend('曲线一','曲线二', ...,'曲线N'); % 按绘图顺序依次指定名称
+```
+### 3、在同一窗口绘制多个子图
+```matlab
+subplot(M,N,1); % M行N列个子图的第1个
+plot(X,Y1);
+...
+subplot(M.N,2); %M行N列个子图的第2个
+plot(X,Y2);
+...
+...
+subplot(M,N, M*N); %M行N列个子图的第M*N个
+plot(X,...);
+```
+
+## 二、图形对象
+图形对象的层级关系
+```text
+Root                                : matlab.ui.Root
+ └──Figure                          : matlab.ui.Figure
+     ├──Axes                        : matlab.graphics.axis.Axes, *.PolarAxes
+     │   └──(Group Objects)         : Group,Transform
+     │       ├──Chart Objects       : Area,Bar,Contour,ErrorBar,GeographicBubbleChart,HeatmapChart,Line,Quiver,Scatter,Stair,Stem,Surface,WordCloudChart
+     │       ├──Primitive Objects   : matlab.graphics.chart.primitive.AnimatedLine, Image,Light,Line,Patch,Polygon,Rectangle,Surface,Text
+     |       ├──Function Objects    : FunctionLine,ImplicitFunctionLine,ParameterizedFunctionLine,FunctionContour,FunctionSurface,ImplicitFunctionSurface,ParameterizedFunctionSurface
+     |       └──*Ruler Objects      : CategoricalRuler,DatetimeRuler,DurationRuler,NumericRuler
+     │
+     ├──Annotation Objects          : Arrow,DoubleEndArrow,Ellipse,Line,Rectangle,TextArrow,TextBox
+     ├──Illustration Objects        : matlab.graphics.illustration.Colorbar, Legend
+     └──UI Objects
+```
+
+## 三、自定义Figure设置函数figset
+
+为了方便在MATLAB中设置绘图格式，编写了fitset函数文件。该函数可以：
+- 设置默认线宽、字体、Figure大小。
+- 一次设置title,xlabel,ylabel,xlim,ylim,xtick,ytick,legend等多项参数，节省代码篇幅。
+- 以指定前缀保存当前打开的所有Figure到png和eps文件。
+
+#### 使用步骤
+```matlab
+第一步：在绘图之前，使用 figset('-init',[1,1]) 设置默认的figure和axes大小，其中[1,1]表示将figure设置为含1x1个子图时的大小。figset('-init',[1,1])设置的是全局默认参数，在MATLAB运行期间始终有效，因此只需要在绘制第一个图前调用一次。
+第二步：在当前绘图完成时，紧接着调用 figset设置Figure的标题、坐标轴等参数（详见下文）。
+第三步：调用 figset('-saveall',pathPrefix) 保存当前所有figure。
+```
+#### 样例
+```matlab
+figset('-init',[1,1])
+plot(0:10, 0:0.1:1);
+hold on
+h=plot(0:10, 0.5:0.05:1);
+figset(h, '-t-xl-yl','Example title','example xlabel','example ylabel', ...     % h为当前图形句柄，可选，未设置时作用于当前Axes
+	'-xt-yt-xm',0:1:10, 0:0.1:1, [0,10], ...               % 等价于 XTick=0:1:10  YTick=0:0.1:1  xlim([-100 -20])
+	'-legend', {'example legendA','example legend B'});                          %图例，多个字符串用{}括起来作为一个cell数组
+% 注意：选项字符串无顺序要求，只需要与后面紧接的参数顺序一一对应，并且所有选项是可选的
+figset('-saveall',['Figout/M-']);  %将当前所有Figure保存在Figout文件夹（应保证该文件夹已存在），文件名分别为M-01.png M-02.png ...
+```
+
+#### 详细语法
+figset函数有三个功能，分别在不同阶段使用。设置方式为：首先给出包含多个选项的选项字符串，其后依次紧跟这些选项对应的参数。语法如下：
+```matlab
+功能1：设置全局默认值，主要是设置默认字体，默认的figure和字体的大小。该函数应在绘图前调用。
+ 语法：figset('-init',[rows cols]); % rows 和 cols 对应subplot(rows,cols,index)中的rows,cols。不使用多子图时都设为1.
+功能2：设置绘图格式，紧跟在绘图之后调用
+ 语法:
+	figset(OptStringA, varA1,varA2,...,OptStrngB,varB1,varB2,...)
+	figset(fig, OptStringA, varA1,varA2,...,OptStringB,varB1,varB2,...)
+	其中OptStringA（选项字符串）含义如下:
+	-t title 图标题
+	-xl: xlabel -yl: ylabel 轴标签
+	-xm: xlim   -ym: ylim   坐标范围
+	-xt: XTick  -yt: YTick  显示刻度的位置
+	-lengend: legend 图例
+功能3：保存当前所有的绘图(figure)，将保存两种格式：png和eps
+ 语法：figset('-saveall',pathPrefix); %pathPrefix为保存文件的前缀.
+```
+#### 源文件
+[figset.m](/assets/matlab/figset.m)
+```matlab
+function  figset(varargin)
+%绘图设定
+% 返回值: None
+% Syntax:
+%	figset(OptsA, varA1,varA2,...,OptsB,varB1,varB2,...)
+%	figset(fig, OptsA, varA1,varA2,...,OptsB,varB1,varB2,...)
+% 选项字符串:
+%    -t title 图标题
+%    -xl xlabel -yl ylabel 轴标签
+%    -xm xlim   -ym ylim   坐标范围
+%    -xt XTick  -yt YTick  显示刻度的位置
+%    -lengend legend 图例
+%    -init 初始化绘图默认值，应在绘图前调用
+%    -saveall 以指定前缀保存所有Figure为png格式.
+% Examples:
+%	 figset('-init',[1,1])
+%	 plot(0:10, 0:0.1:1);
+%	 hold on
+%	 h=plot(0:10, 0.5:0.05:1);
+%	 figset(h, '-t-xl-yl','Example title','example xlabel','example ylabel', ...    % h为当前图形句柄，可选，未设置时作用于当前Axes
+%		 '-xt-yt-xm',0:1:10, 0:0.1:1, [0,10], ...               % 等价于XTick=0:1:10 YTick=0:0.1:1 xlim([-100 -20])	 
+%		 '-legend', {'example legendA','example legend B'});    %图例，多个字符串用{}括起来作为一个cell数组
+%		%注意：选项字符串与参数一一对应，无顺序要求，并且每个选项是可选的
+%	 figset('-saveall',['Figout/M-']); %将当前所有Figure保存在Figout文件夹（应保证该文件夹已存在），文件名分别为M-01.png M-02.png ...
+%  
+% Author: S.E.Wei
+if nargin<1
+    error('缺失参数');
+else
+    curpos = 1;
+    if isa(varargin{1},'matlab.graphics.axis.Axes')
+        curpos = curpos+1;
+        gah = varargin{1};        
+    elseif isa(varargin{1},'matlab.graphics.chart.primitive.Line')
+        curpos = curpos+1;
+        gah = varargin{1}.Parent(1);        
+    elseif isa(varargin{1},'matlab.ui.Figure')
+        curpos = curpos+1;
+        gahs = varargin{1}.Children;
+        axesnum=0;
+        for ki = 1:length(gahs)
+            if isa(gahs(ki),'matlab.graphics.axis.Axes')
+                gah = gahs(ki);
+                axesnum = axesnum+1;
+                if axesnum>1
+                    error('当前Figure有多个Axes');
+                end
+            end
+        end
+    elseif numel(get(groot,'Children'))>0
+        gah = gca;
+    end
+    
+    while curpos<=nargin
+        if ~isa(varargin{curpos},'char')
+            error('Format string not found');
+        else
+            props = strsplit(varargin{curpos},'-');
+            props = props(~strcmpi(props,''));  %去空
+            nvars = sum(~(strcmpi(props,'')));
+            if curpos+nvars>nargin
+                error([varargin{curpos} ' 对应的实参数目不足']);
+            else
+                varcnt = 1;
+                for m=1:length(props)
+                    switch props{m}
+                        case 't' 
+                            if ~exist('gah','var')
+                                error('找不到Axes句柄');
+                            end
+                            title(gah, varargin{curpos+varcnt});
+                            varcnt = varcnt+1;
+                        case 'xl'
+                            if ~exist('gah','var')
+                                error('找不到Axes句柄');
+                            end
+                            xlabel(gah, varargin{curpos+varcnt});
+                            varcnt = varcnt+1;
+                        case 'yl'
+                            if ~exist('gah','var')
+                                error('找不到Axes句柄');
+                            end
+                            ylabel(gah, varargin{curpos+varcnt});
+                            varcnt = varcnt+1;
+                        case 'xm'
+                            if ~exist('gah','var')
+                                error('找不到Axes句柄');
+                            end
+                            xlim(gah, varargin{curpos+varcnt});
+                            varcnt = varcnt+1;
+                        case 'ym'
+                            if ~exist('gah','var')
+                                error('找不到Axes句柄');
+                            end
+                            ylim(gah, varargin{curpos+varcnt});
+                            varcnt = varcnt+1;
+                        case 'xt'
+                            if ~exist('gah','var')
+                                error('找不到Axes句柄');
+                            end
+                            set(gah,'XTick', varargin{curpos+varcnt});
+                            varcnt = varcnt+1;
+                        case 'xtl'
+                            if ~exist('gah','var')
+                                error('找不到Axes句柄');
+                            end
+                            set(gah,'XTickLabel', varargin{curpos+varcnt});
+                            varcnt = varcnt+1;
+                        case 'yt'
+                            if ~exist('gah','var')
+                                error('找不到Axes句柄');
+                            end
+                            set(gah,'YTick', varargin{curpos+varcnt});
+                            varcnt = varcnt+1;
+                        case 'ytl'
+                            if ~exist('gah','var')
+                                error('找不到Axes句柄');
+                            end
+                            set(gah,'YTickLabel', varargin{curpos+varcnt});
+                            varcnt = varcnt+1;
+                        case 'legend'
+                            if ~exist('gah','var')
+                                error('找不到Axes句柄');
+                            end
+                            legend(gah, varargin{curpos+varcnt});
+                            varcnt = varcnt+1;
+                        case 'init'
+                            figureSetDefault(varargin{curpos+varcnt});
+                            varcnt = varcnt+1;
+                        case 'saveall'
+                            grh = groot;
+                            figs = grh.Children;
+                            for n=1:length(figs)
+                                print(figs(n),'-dpng','-r150',[varargin{curpos+varcnt} num2str(figs(n).Number,'%02d')]);
+                                print(figs(n),'-depsc','-r150',[varargin{curpos+varcnt} num2str(figs(n).Number,'%02d')]);
+                            end
+                            varcnt = varcnt+1;
+                        otherwise
+                            error(['Unknown parameter: -' props{m}]);
+                    end %end switch
+                end %end for
+                curpos = curpos+varcnt;               
+            end % end if number check  
+        end % end if type check
+    end
+    if curpos-1~=nargin
+        warning('多余的参数被忽略');
+    end
+end
+end
+
+function figureSetDefault(varargin)
+rows=1;
+cols=1;
+linewidth = 1;
+if numel(varargin{1})>=2
+rows=varargin{1}(1);
+cols=varargin{1}(2);
+end
+if numel(varargin{1})>=3
+    linewidth = varargin{1}(3);
+end
+widthRef = [560 880 1200]; heightRef = [420 660 900];
+set(groot, 'DefaultFigurePosition', [400-rows*100, 300-cols*75, widthRef(cols), heightRef(rows)]);
+% set(groot, 'DefaultFigurePaperPositionMode','manual');
+% set(groot, 'DefaultFigurePaperPosition', [0, 0, widthRef(rows), heightRef(cols)]);
+set(groot, 'DefaultAxesPosition', [.12, .13, .78, .79]);
+% set(groot, 'DefaultAxesPosition', [.11, .13, .76, .76]);
+set(groot, 'DefaultLineLineWidth',linewidth);
+% set(groot, 'defaultAxesLineStyleOrder',{'-',':'});
+set(groot, 'DefaultAxesFontsize',14);
+set(groot, 'DefaultAxesFontname','Times New Roman'); %'Times New Roman'
+
+set(groot, 'DefaultTextFontsize',16);
+set(groot, 'DefaultTextFontname','Times New Roman');
+set(groot, 'DefaultColorBarFontsize',14);
+set(groot, 'DefaultColorBarFontname','Times New Roman'); %'Times New Roman'
+set(0,'DefaultAxesFontWeight','bold');
+set(0,'DefaultTextFontWeight','bold');
+end
+```
+
+## 四、常见二维图索引
+
+#### 基本绘图函数plot,line,fill,text
+其他任何复杂二维图形原理上都可由 `plot,line,fill,text` （点(线)，线，区域填充，绘制文本）函数绘制
+
+#### loglog 绘制双对数坐标图形
+![loglog-1.png](/assets/matlab/loglog-1.png)
+#### semilogx 单对数坐标
+![semilogx-1.png](/assets/matlab/semilogx-1.png)
+#### polarplot 绘制极坐标图
+![polarplot-1.png](/assets/matlab/polarplot-1.png)
+![polarplot-2.png](/assets/matlab/polarplot-2.png)
+#### bar 二维垂直条形图
+![bar-1.png](/assets/matlab/bar-1.png)
+![bar-2.png](/assets/matlab/bar-2.png)
+![bar-3.png](/assets/matlab/bar-3.png)
+#### barh 二维水平条形图
+![barh-1.png](/assets/matlab/barh-1.png)
+![barh-2.png](/assets/matlab/barh-2.png)
+![barh-3.png](/assets/matlab/barh-3.png)
+#### stairs 阶梯图形
+![stairs-1.png](/assets/matlab/stairs-1.png)
+![stairs-2.png](/assets/matlab/stairs-2.png)
+#### compass 从原点画箭头图
+![compass-1.png](/assets/matlab/compass-1.png)
+#### comet 绘制二维彗星图
+![comet-1.png](/assets/matlab/comet-1.png)
+#### errorbar 绘制误差图
+![errorbar-1.png](/assets/matlab/errorbar-1.png)
+![errorbar-2.png](/assets/matlab/errorbar-2.png)
+![errorbar-3.png](/assets/matlab/errorbar-3.png)
+![errorbar-4.png](/assets/matlab/errorbar-4.png)
+![errorbar-5.png](/assets/matlab/errorbar-5.png)
+#### feather 画速度向量图
+![feather-1.png](/assets/matlab/feather-1.png)
+#### hist 二维条形直方图
+![hist-1.png](/assets/matlab/hist-1.png)
+![hist-2.png](/assets/matlab/hist-2.png)
+#### rose 角度直方图
+![rose-1.png](/assets/matlab/rose-1.png)
+#### stem 画二维离散数据图
+![stem-1.png](/assets/matlab/stem-1.png)
+#### stem3 画三维离散数据图
+![stem3-1.png](/assets/matlab/stem3-1.png)
+![stem3-2.png](/assets/matlab/stem3-2.png)
+#### pie 画饼图
+![pie-1.png](/assets/matlab/pie-1.png)
+![pie-2.png](/assets/matlab/pie-2.png)
+![pie-3.png](/assets/matlab/pie-3.png)
+## 五、常用三维图索引
+#### meshgrid生成栅格数据
+```matlab
+XX = 1:10
+YY = 1:20
+[X Y] = meshgrid(XX,YY); %生成length(XX)*length(YY)个数据点的栅格
+Z = sin(X).*Y;
+surf(X,Y,Z);    %绘图示例
+```
+#### plot3 绘制三维曲线
+![plot3-1.png](/assets/matlab/plot3-1.png)
+#### mesh 绘制三维网格图
+![mesh-1.png](/assets/matlab/mesh-1.png)
+#### surf 三维曲面图
+![surf-1.png](/assets/matlab/surf-1.png)
+#### contour3 三维等高线绘制
+![contour3-1.png](/assets/matlab/contour3-1.png)
+#### contour 曲面的等高线
+![contour-1.png](/assets/matlab/contour-1.png)
+#### clabel 等高线填标签
+#### contourc 等高线图形计算
+#### fill3 填充三维图
+![fill3-1.png](/assets/matlab/fill3-1.png)
+#### sphere 绘制球体
+![sphere-1.png](/assets/matlab/sphere-1.png)
+#### contourf 填充二维等高线
+![contourf-1.png](/assets/matlab/contourf-1.png)
+#### pie3 三维饼图
+![pie3-1.png](/assets/matlab/pie3-1.png)
+#### comet3 三维彗星图绘制
+![comet3-1.png](/assets/matlab/comet3-1.png)
+#### surf 阴影曲面图
+![surf-1.png](/assets/matlab/surf-1.png)
+#### cylinder 生成圆柱图形
+![cylinder-1.png](/assets/matlab/cylinder-1.png)
+![cylinder-2.png](/assets/matlab/cylinder-2.png)
+#### surfc 绘制阴影图及等高线
+![surfc-1.png](/assets/matlab/surfc-1.png)
+#### surfl 带光照模式的曲面图
+![surfl-1.png](/assets/matlab/surfl-1.png)
+#### waterfall 瀑布图
+![waterfall-1.png](/assets/matlab/waterfall-1.png)
+
+
+<!--\{\{ page.date - 28800 | date: "%Y-%m-%d %H:%M" }}-->
+
