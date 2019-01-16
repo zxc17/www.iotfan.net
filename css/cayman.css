@@ -209,9 +209,14 @@ a:hover { text-decoration: underline; }
 @media screen and (min-width: 42em) and (max-width: 64em) { .project-tagline { font-size: 1.15rem; } }
 @media screen and (max-width: 42em) { .project-tagline { font-size: 1rem; } }
 
+#markdown-toc { font-weight: normal; position: absolute; left: 1rem; top: 14rem;}
+@media screen and (min-width: 64em) { #markdown-toc { font-size: 0.9rem; } }
+@media screen and (min-width: 42em) and (max-width: 64em) { #markdown-toc { font-size: 0.9rem; } }
+@media screen and (max-width: 42em) { #markdown-toc { font-size: 0.9rem; } }
+
 .main-content { word-wrap: break-word; }
 .main-content :first-child { margin-top: 0; }
-@media screen and (min-width: 64em) { .main-content { max-width: 64rem; padding: 2rem 6rem; margin: 0 auto; font-size: 1.1rem; } }
+@media screen and (min-width: 64em) { .main-content { max-width: 70rem; padding: 2rem 6rem; margin: 0 auto; font-size: 1.1rem; } }
 @media screen and (min-width: 42em) and (max-width: 64em) { .main-content { padding: 2rem 4rem; font-size: 1.1rem; } }
 @media screen and (max-width: 42em) { .main-content { padding: 2rem 1rem; font-size: 1rem; } }
 .main-content img { max-width: 83%; margin: 1rem 0.8rem; border: 2px solid rgba(160,180,140,0.2); }
