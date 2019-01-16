@@ -7,6 +7,9 @@ tags: [开发环境配置, USRP, GNU Radio, UHD]
 ---
 Curl是利用URL语法在命令行方式下工作的开源数据传输工具，经常用做HTTP Server的调试，用于Linux，macOS，Windows等众多不同平台的版本，使用方便、功能强大。本文目的是记录Curl在Windows平台下的安装配置过程。
 
+* TOC
+{:toc}
+
 ## 系统选择
 尽管Windows下也可以安装Gnuradio，但是强烈不建议这样做，因为Windows版本并不受官方的支持和维护。
 

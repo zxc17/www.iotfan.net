@@ -9,9 +9,12 @@ tags: [Linux, 整理]
 
 本文主要是新建服务器的常用环境配置，针对的是Centos系统，其他版本的Linux也可以参考。
 
+* TOC
+{:toc}
+
 ## 常用工具
 	
--	常用工具名字
+-	常用工具列表
 	```bash
 	vim htop tree
 	```

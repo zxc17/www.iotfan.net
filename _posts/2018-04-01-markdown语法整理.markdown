@@ -7,6 +7,9 @@ categories: IT
 tags: [Markdown, 整理]
 ---
 
+* TOC
+{:toc}
+
 ## 类Select形式标题
 
 ``` markdown
