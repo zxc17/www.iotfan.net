@@ -1,0 +1,36 @@
+---
+layout: post
+title:  "MATLAB使用笔记(持续更新)"
+subtitle: 
+showheadline: true
+categories: IT
+tags: [MATLAB, 整理]
+---
+
+* TOC
+{:toc}
+## 常用网址
+
+
+## 功能与命令
+### 环境变量与自动脚本
+- 在任意一个Matlab搜索路径（Path）下建立一个startup.m文件即可。这样Matlab启动时会自动运行这个脚本。
+- MATLAB搜寻过程
+    1. 是否变量
+    2. 是否函数
+    3. 是否当前目录下的m文件
+    4. 是否搜索路径下其他m文件
+- 相关命令
+    - path: 输出所有Matlab搜索路径
+    - pathtool: 可更改MATLAB搜索路径的图形界面工具
+
+## 函数使用
+
+
+
+## 常用程序片段
+
+
+
+
+
