@@ -359,5 +359,56 @@ Jekyll是一个静态博客渲染器，支持用Markdown编写我们的静态网
 	```
 
 [MariaDB]: https://downloads.mariadb.org/
-<!--\{\{ page.date - 28800 | date: "%Y-%m-%d %H:%M" }}-->
 
+## Samba（该部分使用的是Ubuntu系统）
+[MariaDB][]源于MySQL，除了一些地方的名字与MySQL不同，使用方法与MySQL几乎完全一致。此处安装时的版本是`mariadb-5.5`，对于其他版本未做测试，一般来说是一致的。
+
+1. 安装
+	- 安装
+		```bash
+		sudo apt-get install samba
+		sudo apt-get install smbclient  #客户端程序，可选
+		```
+2. 配置
+	- `sudo vim /etc/samba/smb.conf`
+		打开配置文件后，在配置文件末尾加上以下内容，此外，配置文件中的printers和print不需要可以将其注释掉。
+		```conf
+		[share]
+		comment = Shared Folder require password
+		path = /home/share
+		public = yes
+		writable = yes
+		valid users = share
+		create mask = 0777
+		directory mask = 0777
+		force user = share
+		force group = share  # 登录后的用户身份
+		available = yes
+		browseable = yes
+		read only = no
+		```
+		配置完成后，可用`testparm`命令检查配置文件是否有错误
+	- 向samba服务中添加用户
+		`smbpasswd -a share`，将share用户添加进samba服务，并设置该用户访问samba的密码（注意不是share用户在Linux中的密码）。
+		如果系统中不存在share用户，可用`adduser share`命令创建，当然也可用使用除share外的其他用户名。
+3. 运行Samba服务
+	- 启动
+		```bash
+		systemctl start smbd.service
+		systemctl enable smbd.service  #使能开机自启
+		```
+	- 访问测试
+		执行`smbclient //127.0.0.1/share -U share`命令，根据提示输入密码，如果进入smb shell则说明一切正常。
+		
+4. 端口映射
+	该步骤是samba服务器139、445端口被封时（如阿里云等禁止了139、445端口的访问）的解决方案，如果139、445端口可以直接访问（如局域网，注意要开放防火墙中的TCP139、445端口）则可以跳过该步骤。
+	x原理是使用iptables的端口转发将流量从其他未被封的端口转发到445端口（包括139端口），步骤如下：
+	```bash
+	sudo iptables -t nat -A PREROUTING -p tcp -i eth0 -d 172.18.60.111 --dport 3139 -j DNAT --to 172.18.60.111:139
+	sudo iptables -t nat -A PREROUTING -p tcp -i eth0 -d 172.18.60.111 --dport 3445 -j DNAT --to 172.18.60.111:445
+	```
+	其中，172.18.60.111是samba服务器的外网ip，功能是实现端口3139->139，3445->445的流量转发。
+5. Windows中使用samba服务
+
+
+<!--\{\{ page.date - 28800 | date: "%Y-%m-%d %H:%M" }}-->
