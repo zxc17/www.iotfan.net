@@ -410,5 +410,51 @@ Jekyll是一个静态博客渲染器，支持用Markdown编写我们的静态网
 	其中，172.18.60.111是samba服务器的外网ip，功能是实现端口3139->139，3445->445的流量转发。
 5. Windows中使用samba服务
 
+## 通过IPv6隧道使无Global IPv6的VPS拥有Global IPv6
+通过IPv6隧道，可以时原本没有Global IPv6地址的服务器使用Global。这里通过一台只有公网IPv4的香港的VPS为例，IPv6隧道使用的是[HE](https://www.tunnelbroker.net)提供的免费服务。
+
+1. 在HE申请IPv6隧道（IPv6 Tunnel）
+	- 第一步：注册账号。
+	- 第二步：点击左侧的`Create Regular Tunnel`，注册IPv6 Tunnel。其中`IPv4 Endpoint (Your side)`项填写VPS的公网IPv4地址，根据自己的需要选择地区。申请成功后在`Tunnel Details`中可以看到IPv6 Tunnel的详细信息，例如：
+		```bash
+		Server IPv4 Address:216.218.XXX.XXX
+		Server IPv6 Address:2001:470:XX:XXXX::1/64
+		Client IPv4 Address:149.129.XXX.XXX
+		Client IPv6 Address:2001:470:XX:XXXX::2/64
+		```
+2. 在Centos中配置IPv6 Tunnel
+首先，确保自己的VPS支持并且以开启IPv6服务（如果IPv6开启，使用ifconfig会显示有IPv6 local address）。下面是开启IPv6的方法：
+        - `vim /etc/modprobe.d/disable_ipv6.conf`，修改下面的行为
+	    ```bash
+	    options ipv6 disable=0
+	    ```
+        - `vim /etc/sysconfig/network`，修改下面的行为
+	    ```bash
+	    NETWORKING_IPV6=yes
+	    ```
+	- `vim /etc/sysctl.conf`，修改下面这些行为
+	    ```bash
+	    net.ipv6.conf.all.disable_ipv6 = 0
+            net.ipv6.conf.default.disable_ipv6 = 0
+            net.ipv6.conf.lo.disable_ipv6 = 0
+	    ```
+然后依次执行`service network restart`、`sysctl -p`（需要root权限），启用IPv6。此时可再用ifconfig会出现IPv6 local address。
+2. 配置IPv6 Tunnel
+在刚才HE的Tunnel Details中，点击Example Configurations，选择`Linux-route2`，然后下面会自动生成配置IPv6 Tunnel的Shell命令，例如：
+	```bash
+	modprobe ipv6
+	ip tunnel add he-ipv6 mode sit remote 216.218.XXX.XXX local 149.129.XXX.XXX ttl 255
+	ip link set he-ipv6 up
+	ip addr add 2001:470:XX:XXXX::2/64 dev he-ipv6
+	ip route add ::/0 dev he-ipv6
+	ip -f inet6 addr
+	```
+在VPS中执行上述命令即可完成IPv6 Tunnel的配置，这里需要注意的是如果VPS中不是直接使用的公网地址149.129.XXX.XXX，而是一个内网地址的话，local的149.129.XXX.XXX应该改为该内网地址。
+上述步骤完成后，使用ifconfig命令查看网络配置会发现多一个he-ipv6的interface，并且拥有了Global IPv6.
+
+## 科X学上网
+通过IPv6隧道，可以时原本没有Global IPv6地址的服务器使用Global。这里通过一台只有公网IPv4的香港的VPS为例，IPv6隧道使用的是[HE](https://www.tunnelbroker.net)提供的免费服务。
+
+1. 在HE申请IPv6隧道（IPv6 Tunnel）
 
 <!--\{\{ page.date - 28800 | date: "%Y-%m-%d %H:%M" }}-->
