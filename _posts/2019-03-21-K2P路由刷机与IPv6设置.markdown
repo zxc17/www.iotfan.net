@@ -1,0 +1,46 @@
+---
+layout: post
+title:  "操作系统安装与配置(Win10&Ubuntu)"
+subtitle: 
+showheadline: true
+categories: IT
+tags: [系统, 安装, 整理]
+---
+
+* TOC
+{:toc}
+
+## 引言
+	
+-	
+## A1/A2版刷机
+[斐讯K2P A2版 固件版本22.7.8.5刷官改和第三方固件教程](http://www.usbmi.com/3248.html)
+1. 开启Telnet
+2. 刷Breed
+k2p_mtk_v14_breed.rar
+3. 刷Padavan
+4. 教育网IPv6设置
+
+## B1/B2版刷机
+[K2P B2/B1 最新官方固件刷机教程](https://www.right.com.cn/forum/thread-323865-1-1.html)
+
+## Openwrt交叉编译
+[windows 10下免虚拟机安装Ubuntu及Openwrt编译环境](http://iytc.net/wordpress/?p=4885)
+## 教育网IPv6设置
+在Linux shell中执行以下脚本：
+```bash
+modprobe ip6table_mangle
+ebtables -t broute -A BROUTING -p ! ipv6 -j DROP -i eth3
+brctl addif br0 eth3
+```
+作用是保持IPv4处理方式不变，让K2P对IPv6数据包只做交换不做路由。其中eth3是路由器的WAN口，br0是虚拟网关(192.168.x.1)，rax0是无线AP，其他ethx对应4个LAN口。
+为了避免每次开机都要执行一遍，可将上述脚本可以添加到开机启动脚本中。
+## 端口映射与DDNS
+
+## 
+
+
+
+
+
+<!--\{\{ page.date - 28800 | date: "%Y-%m-%d %H:%M" }}-->
