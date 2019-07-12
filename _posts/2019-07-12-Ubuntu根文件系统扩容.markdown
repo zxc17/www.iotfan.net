@@ -1,0 +1,40 @@
+---
+layout: post
+title:  "Ubuntu根文件系统扩容"
+subtitle: 
+showheadline: true
+categories: IT
+tags: [Linux, 分区, 引导,Grub]
+---
+
+环境：Ubuntu16.04，dell。
+
+* TOC
+{:toc}
+
+## 常用工具
+	
+-	常用工具
+	```bash
+	命令行工具：`fdisk -l`，`df`
+  GUI工具：`gparted(分区工具，类似DiskGen)`
+	```
+
+## 扩容
+整理磁盘，在待扩容分区相邻位置腾出Free space，推荐使用`DiskGen`（Windows）或`gparted`（Linux）
+1.  DiskGen调整分区大小报错：检测到文件系统错误，$Bitmip有标记已使用的未用簇。
+    解决方法：在DOS中运行`chkdsk /f /x F:`，将F替换为要检查的盘符，然后重新调整分区大小。
+2.  Linux分区克隆：`dd if=/dev/sdb1 of=/dev/sdc1`，克隆sdb1分区到sdc1。
+3.  使用gparted调整Linux分区时应保证待调整分区不被挂载，最好使用Ubuntu启动盘的临时系统进行操作
+
+## 重建Linux挂载点
+如果扩容过程中原来挂载点对应的分区位置发生变化（文件系统UUID和分区编号改变），则需要重建挂载点，步骤：
+1.  `sudo vi /etc/fstab`，修正挂载点对应分区的UUID和设备名称(形如sda1).
+2.  修正EFI分区下的grub.cfg文件中的引导分区的UUID（如果改变了的话）
+
+Dell无法引导Ubuntu启动盘，出现`Fail to set MokListRT: Out of Resources`错误并伴随随机色块的解决方法：
+进入BIOS设置，选择General->Boot Sequence，使能UEFI选项并且点击Add Boot Option，输入名字并浏览文件，选中启动盘所在分区，并选中EFI文件夹下的`grubx64.efi`文件，点击OK然后保存退出。
+
+## 出现grub rescue修复方法
+[https://blog.csdn.net/weixin_39059031/article/details/81947913](https://blog.csdn.net/weixin_39059031/article/details/81947913)
+<!--\{\{ page.date - 28800 | date: "%Y-%m-%d %H:%M" }}-->
