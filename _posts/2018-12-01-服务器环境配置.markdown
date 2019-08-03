@@ -410,6 +410,50 @@ Jekyll是一个静态博客渲染器，支持用Markdown编写我们的静态网
 	其中，172.18.60.111是samba服务器的外网ip，功能是实现端口3139->139，3445->445的流量转发。
 5. Windows中使用samba服务
 
+## 自定义服务(含开机启动)
+要创建要由systemd管理的自定义服务，请创建一个定义该服务配置的单元文件。 例如，要创建名为myservice的服务，请在`/etc/systemd/system/`中创建名为myservice.service的文件。
+1. 创建服务
+    - 创建普通服务，vim /etc/systemd/system/s-l.service
+    ```conf
+    [Unit]
+    Description=s-l
+    After=network.target
+
+    [Service]
+    Type=simple
+    ExecStart=/usr/bin/s-l -c /etc/s-l/config > /var/log/s-l.log 2>&1
+
+    [Install]
+    WantedBy=default.target
+    ```
+    - 创建Oneshot服务，vim /etc/systemd/system/sdb-mount.service
+    ```conf
+    [Unit]
+    Description=sdb2 sdb3 mount
+    After=network.target
+
+    [Service]
+    Type=onesgot
+    ExecStart=/etc/sdb-mount
+    ExecStop=/etc/sdb-umount
+    RemainAfterExit=yes
+    [Install]
+    WantedBy=default.target
+    ```
+2. 服务管理
+    - 启动服务
+    ```bash
+    chmod 664 /etc/systemd/system/myservice.service     #更改权限
+    systemctl daemon-reload    #重新加载所有Units
+    systemctl start myservice.service    #启动服务
+    ```
+    - 列出当前Units
+    ```bash
+    systemctl list-units
+    systemctl list-units -t service
+    systemctl list-unit-files -t service
+    systemctl list-unit-files --state enabled
+
 ## 通过IPv6隧道使无Global IPv6的VPS拥有Global IPv6
 通过IPv6隧道，可以时原本没有Global IPv6地址的服务器使用Global。这里通过一台只有公网IPv4的香港的VPS为例，IPv6隧道使用的是[HE](https://www.tunnelbroker.net)提供的免费服务。
 
