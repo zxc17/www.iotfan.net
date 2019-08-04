@@ -360,7 +360,7 @@ Jekyll是一个静态博客渲染器，支持用Markdown编写我们的静态网
 
 [MariaDB]: https://downloads.mariadb.org/
 
-## Samba（该部分使用的是Ubuntu系统）
+## Samba（Ubuntu）
 [MariaDB][]源于MySQL，除了一些地方的名字与MySQL不同，使用方法与MySQL几乎完全一致。此处安装时的版本是`mariadb-5.5`，对于其他版本未做测试，一般来说是一致的。
 
 1. 安装
@@ -413,49 +413,239 @@ Jekyll是一个静态博客渲染器，支持用Markdown编写我们的静态网
 ## 自定义服务(含开机启动)
 要创建要由systemd管理的自定义服务，请创建一个定义该服务配置的单元文件。 例如，要创建名为myservice的服务，请在`/etc/systemd/system/`中创建名为myservice.service的文件。
 1. 创建服务
-    - 创建普通服务，vim /etc/systemd/system/s-l.service
-    ```conf
-    [Unit]
-    Description=s-l
-    After=network.target
+	- 创建普通服务，vim /etc/systemd/system/s-l.service
+		```conf
+		[Unit]
+		Description=s-l
+		After=network.target
 
-    [Service]
-    Type=simple
-    ExecStart=/usr/bin/s-l -c /etc/s-l/config.json > /var/log/s-l.log 2>&1
+		[Service]
+		Type=simple
+		ExecStart=/usr/bin/s-l -c /etc/s-l/config.json > /var/log/s-l.log 2>&1
 
-    [Install]
-    WantedBy=default.target
-    ```
-    - 创建Oneshot服务，vim /etc/systemd/system/sdb-mount.service
-    ```conf
-    [Unit]
-    Description=sdb2 sdb3 mount
-    After=network.target
+		[Install]
+		WantedBy=default.target
+		```
+	- 创建Oneshot服务，vim /etc/systemd/system/sdb-mount.service
+		```conf
+		[Unit]
+		Description=sdb2 sdb3 mount
+		After=network.target
 
-    [Service]
-    Type=onesgot
-    ExecStart=/etc/sdb-mount
-    ExecStop=/etc/sdb-umount
-    RemainAfterExit=yes
-    [Install]
-    WantedBy=default.target
-    ```
+		[Service]
+		Type=onesgot
+		ExecStart=/etc/sdb-mount
+		ExecStop=/etc/sdb-umount
+		RemainAfterExit=yes
+		[Install]
+		WantedBy=default.target
+		```
 2. 服务管理
-    - 启动服务
-    ```bash
-    chmod 664 /etc/systemd/system/myservice.service     #更改权限
-    systemctl daemon-reload    #重新加载所有Units
-    systemctl start myservice.service    #启动服务
-    ```
-    - 列出当前Units
-    ```bash
-    systemctl list-units
-    systemctl list-units -t service
-    systemctl list-unit-files -t service
-    systemctl list-unit-files --state enabled
-    ```
+	- 启动服务
+		```bash
+		chmod 664 /etc/systemd/system/myservice.service     #更改权限
+		systemctl daemon-reload    #重新加载所有Units
+		systemctl start myservice.service    #启动服务
+		```
+	- 列出当前Units
+		```bash
+		systemctl list-units
+		systemctl list-units -t service
+		systemctl list-unit-files -t service
+		systemctl list-unit-files --state enabled
+		```
 
 ## GitWeb
 [https://git-scm.com/book/zh/v1/%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%B8%8A%E7%9A%84-Git-GitWeb](https://git-scm.com/book/zh/v1/%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%B8%8A%E7%9A%84-Git-GitWeb)
+[https://my.oschina.net/u/2270256/blog/1922546]()
 
+1. 安装配置git
+	- 安装
+		```bash
+		yum install git git-core
+		```
+	- 添加git用户
+		```bash
+		sudo adduser git
+		su git
+		cd
+		mkdir .ssh
+		cat xxx/id_rsa.pub >> ~/.ssh/authorized_keys
+		```
+		其中`xxx/id_rsa.pub`为客户端的ssh公钥
+	- 禁止git用户登录系统shell。执行 `sudo vim /etc/passwd`，在文件末尾找到类似这样的行：
+		```
+		git:x:1000:1000::/home/git:/bin/sh
+		```
+		把其中的 `bin/sh` 改为 `/usr/bin/git-shell` （或者用 `which git-shell` 查看它的实际安装路径）。该行修改后的样子如下：
+
+		```
+		git:x:1000:1000::/home/git:/usr/bin/git-shell
+		```
+2. 建立git仓库，测试git server
+	- 在server端建立git仓库，此处将仓库根目录设置到`/data/git`
+		```bash
+		mkdir /data/git && chown git:git /data/git -R
+		cd /data/git
+		mkdir project.git
+		cd project.git
+		git --bare init
+		```
+	- 在客户端执行
+		```bash
+		git clone git@server:/data/git/project.git	#验证pull
+		cd project
+		echo "# Test File" >> README.md
+		git add .
+		git commit -m "init commit"
+		git push origin master	#验证push
+		```
+3. 安装Gitweb(nginx)
+	- 安装相关程序
+		```bash
+		yum install nginx perl-CGI fcgiwrap spawn-fcgi gitweb
+		```
+	- 配置Nginx。在配置文件中添加如下的server，然后启动nginx服务。
+		```
+		server {
+		    listen       9091 default_server;
+		    listen       [::]:9091 default_server;
+		    server_name  _;
+
+		    # Load configuration files for the default server block.
+		    include /etc/nginx/default.d/*.conf;
+
+		    location /gitweb.cgi {
+			gzip                off;
+			fastcgi_param       SCRIPT_FILENAME     /var/www/git/gitweb.cgi;
+			fastcgi_param       GITWEB_CONFIG       /etc/gitweb.conf;
+			fastcgi_pass        unix:/var/run/fcgiwrap.socket;
+			include             fastcgi_params;
+		    }
+
+		    location / {
+			root    /var/www/git;
+			index   gitweb.cgi;
+		    }
+		}
+		```
+	- 配置gitweb，`vim /etc/gitweb.conf`，修改（如果存在）或添加：
+		```conf
+		$projectroot = "/data/git";
+		$git_temp = "/tmp";
+		```
+	- 配置CGI。
+		`vim /etc/init.d/fcgiwrap`
+		```bash
+		#! /bin/bash
+		### BEGIN INIT INFO
+		# Provides:          fcgiwrap
+		# Required-Start:    $remote_fs
+		# Required-Stop:     $remote_fs
+		# Should-Start:
+		# Should-Stop:
+		# Default-Start:     2 3 4 5
+		# Default-Stop:      0 1 6
+		# Short-Description: FastCGI wrapper
+		# Description:       Simple server for running CGI applications over FastCGI
+		### END INIT INFO
+
+		PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+		SPAWN_FCGI="/usr/bin/spawn-fcgi"
+		DAEMON="/usr/sbin/fcgiwrap"
+		NAME="fcgiwrap"
+
+		PIDFILE="/var/run/$NAME.pid"
+
+		FCGI_SOCKET="/var/run/$NAME.socket"
+		FCGI_USER="git"
+		FCGI_GROUP="nginx"
+		FORK_NUM=5
+		SCRIPTNAME=/etc/init.d/$NAME
+
+		case "$1" in
+		    start)
+			echo -n "Starting $NAME... "
+
+			PID=`pidof $NAME`
+			if [ ! -z "$PID" ]; then
+			    echo " $NAME already running"
+			    exit 1
+			fi
+
+			$SPAWN_FCGI -u $FCGI_USER -g $FCGI_GROUP -s $FCGI_SOCKET -P $PIDFILE -F $FORK_NUM -f $DAEMON
+
+			if [ "$?" != 0 ]; then
+			    echo " failed"
+			    exit 1
+			else
+			    chmod g+w $FCGI_SOCKET
+			    echo " done"
+			fi
+		    ;;
+
+		    stop)
+			echo -n "Stoping $NAME... "
+
+			PID=`pidof $NAME`
+			if [ ! -z "$PID" ]; then
+			    kill `pidof $NAME`
+			    if [ "$?" != 0 ]; then
+				echo " failed. re-quit"
+				exit 1
+			    else
+				rm -f $pid
+				echo " done"
+			    fi
+			else
+			    echo "$NAME is not running."
+			    exit 1
+			fi
+		    ;;
+
+		    status)
+			PID=`pidof $NAME`
+			if [ ! -z "$PID" ]; then
+			    echo "$NAME (pid $PID) is running..."
+			else
+			    echo "$NAME is stopped"
+			    exit 0
+			fi
+		    ;;
+
+		    restart)
+			$SCRIPTNAME stop
+			sleep 1
+			$SCRIPTNAME start
+		    ;;
+
+		    *)
+			echo "Usage: $SCRIPTNAME {start|stop|restart|status}"
+			exit 1
+		    ;;
+		esac
+		```
+		启动脚本，注意spawn-fcgi跟fcgiwrap脚本路径及FCGI_GROUP跟FCGI_GROUP，脚本启动了5个cgi进程，按需调整：
+		```bash
+		chmod a+x /etc/init.d/fcgiwrap
+		chkconfig --level 35 fcgiwrap on
+		sudo /etc/init.d/fcgiwrap start
+		```
+	- 给gitweb添加basic authorization
+		
+		生成认证文件
+		```bash
+		sudo printf "test:$(openssl passwd -apr1 123456)\n" >> /var/www/git/.gitpasswd
+		sudo chown nginx:nginx /home/git/.gitpasswd
+		```
+		在前面nginx的server配置中添加：
+		```
+		auth_basic "Git User Authentication";
+    		auth_basic_user_file /var/www/git/.gitpasswd;
+		```
+		重启nginx，使用curl测试gitweb访问
+		```bash
+		curl localhost:9091 -i
+		curl localhost:9091 -i --basic -u test:123456
+		```
 <!--\{\{ page.date - 28800 | date: "%Y-%m-%d %H:%M" }}-->
