@@ -636,16 +636,17 @@ Jekyll是一个静态博客渲染器，支持用Markdown编写我们的静态网
 		生成认证文件
 		```bash
 		sudo printf "test:$(openssl passwd -apr1 123456)\n" >> /var/www/git/.gitpasswd
-		sudo chown nginx:nginx /home/git/.gitpasswd
+		sudo chown nginx:nginx /var/www/git/.gitpasswd
 		```
 		在前面nginx的server配置中添加：
 		```
-		auth_basic "Git User Authentication";
-    		auth_basic_user_file /var/www/git/.gitpasswd;
+		auth_basic "Restricted";
+		auth_basic_user_file /var/www/git/.gitpasswd;
 		```
 		重启nginx，使用curl测试gitweb访问
 		```bash
 		curl localhost:9091 -i
 		curl localhost:9091 -i --basic -u test:123456
 		```
+		
 <!--\{\{ page.date - 28800 | date: "%Y-%m-%d %H:%M" }}-->
