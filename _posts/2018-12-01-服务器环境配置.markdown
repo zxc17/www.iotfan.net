@@ -503,7 +503,7 @@ Jekyll是一个静态博客渲染器，支持用Markdown编写我们的静态网
 3. 安装Gitweb(nginx)
 	- 安装相关程序
 		```bash
-		yum install nginx perl-CGI fcgiwrap spawn-fcgi gitweb
+		yum install nginx perl-CGI fcgiwrap spawn-fcgi gitweb highlight
 		```
 	- 配置Nginx。在配置文件中添加如下的server，然后启动nginx服务。
 		```
@@ -533,6 +533,7 @@ Jekyll是一个静态博客渲染器，支持用Markdown编写我们的静态网
 		```conf
 		$projectroot = "/data/git";
 		$git_temp = "/tmp";
+		$feature{'highlight'}{'default'} = [1];
 		```
 	- 配置CGI。
 		`vim /etc/init.d/fcgiwrap`
