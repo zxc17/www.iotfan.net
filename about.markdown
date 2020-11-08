@@ -9,6 +9,6 @@ date:   2018-02-13
 
 E-mail：[master@cdroom.com](mailto:master@cdroom.net)
 
-Weibo : 云梦斋主人 (可直接扫描下面二维码)
+Weibo : 缓风细雨 (可直接扫描下面二维码)
 
-<img src="/assets/weibo.png" alt="云梦斋主人的微博" style="margin: 0px; border: 0; "/>
+<img src="/assets/weibo.png" alt="缓风细雨的微博" style="margin: 0px; border: 0; "/>
